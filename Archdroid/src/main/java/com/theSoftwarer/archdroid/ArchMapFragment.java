@@ -1,4 +1,4 @@
-package com.theSoftwarersApprentice.archdroid;
+package com.theSoftwarer.archdroid;
 
 import android.location.Location;
 import android.os.Bundle;

@@ -7,7 +7,7 @@
     android:orientation="vertical">
 
 
-    <fragment class="com.theSoftwarersApprentice.archdroid.ArchMapFragment"
+    <fragment class="com.theSoftwarer.archdroid.ArchMapFragment"
         android:id="@+id/map_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
