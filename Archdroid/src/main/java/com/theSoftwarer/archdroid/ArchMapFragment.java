@@ -7,9 +7,14 @@ import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.SimpleAdapter;
+import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockListFragment;
 import com.google.android.gms.location.LocationListener;
@@ -46,8 +51,9 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
     private static final int CREATE_MARKERS = 1415;
     private static final int CREATE_PAGES = 9265;
     private static final int CREATE_LISTS = 3589;
-    private String bounds, js, urlPlace, idMarker;
-    private Handler handler;
+    private String bounds, js, urlPlace;
+    private static String idMarker;
+    private static Handler handler;
     private DatasetsAdapter mPagerAdapter;
     private ViewPager mPager;
     private static List<HashMap<String,String>> annotations;
@@ -134,7 +140,7 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
         return false;
     }
 
-    private void searchPelagiosData(String string, int switcher) throws IOException {
+    private static void searchPelagiosData(String string, int switcher) throws IOException {
         HttpURLConnection conn = null;
         final StringBuilder json = new StringBuilder();
         try {
@@ -160,7 +166,7 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
         }
     }
 
-    private void sendToUIThread(String string, int switcher) {
+    private static void sendToUIThread(String string, int switcher) {
         Message msg = handler.obtainMessage();
         Bundle bundle = new Bundle();
         bundle.putString("data", string);
@@ -233,7 +239,6 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-/*
             uri = getArguments().getString("uri");
             new Thread(new Runnable() {
                 public void run() {
@@ -244,10 +249,10 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
                         Log.e(LOG_TAG, "Cannot retrieve annotations for this place", e);
                     }
                 }
-            }).start();*/
+            }).start();
 
         }
-/*        @Override
+        @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
 
 
@@ -264,7 +269,7 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
             setListAdapter(adapter);
 
             return super.onCreateView(inflater, container, savedInstanceState);
-        }*/
+        }
 
         public static AnnotationsFragment newInstance(int ord, int count, String title, String uri) {
 
@@ -282,7 +287,7 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
 
     }
 
-    public static class DatasetsAdapter extends FragmentPagerAdapter{
+    public static class DatasetsAdapter extends FragmentStatePagerAdapter {
 
         List<String[]> dsets;
         String[] ttlUr;
