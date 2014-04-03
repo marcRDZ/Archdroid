@@ -9,11 +9,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.SimpleAdapter;
-import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockListFragment;
 import com.google.android.gms.location.LocationListener;
@@ -226,7 +222,7 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
 
     }
 
-    public class AnnotationsFragment extends SherlockListFragment {
+    public static class AnnotationsFragment extends SherlockListFragment {
 
         private String uri;
 
@@ -237,7 +233,7 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-
+/*
             uri = getArguments().getString("uri");
             new Thread(new Runnable() {
                 public void run() {
@@ -248,14 +244,15 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
                         Log.e(LOG_TAG, "Cannot retrieve annotations for this place", e);
                     }
                 }
-            }).start();
+            }).start();*/
 
         }
-        @Override
+/*        @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
 
 
-            TextView titleBar = (TextView) inflater.inflate(R.id.title, container);
+            View v = inflater.inflate(R.layout.list_layout, container);
+            TextView titleBar = (TextView) v.findViewById(R.id.title);
             titleBar.setText(getArguments().getString("title"));
             // Keys used in Hashmap
             String[] from = {"name", "url"};
@@ -267,9 +264,9 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
             setListAdapter(adapter);
 
             return super.onCreateView(inflater, container, savedInstanceState);
-        }
+        }*/
 
-        public AnnotationsFragment newInstance(int ord, int count, String title, String uri) {
+        public static AnnotationsFragment newInstance(int ord, int count, String title, String uri) {
 
             AnnotationsFragment f = new AnnotationsFragment();
             Bundle args = new Bundle();
@@ -299,7 +296,8 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
         @Override
         public Fragment getItem(int position) {
             ttlUr = dsets.get(position);
-            return anFrag.newInstance(position, dsets.size(), ttlUr[0], ttlUr[1]);
+            anFrag = anFrag.newInstance(position, dsets.size(), ttlUr[0], ttlUr[1]);
+            return anFrag;
         }
 
         @Override
