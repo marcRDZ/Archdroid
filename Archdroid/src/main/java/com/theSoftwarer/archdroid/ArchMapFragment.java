@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SimpleAdapter;
+import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockListFragment;
 import com.google.android.gms.location.LocationListener;
@@ -254,7 +255,8 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
         public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
 
 
-
+            TextView titleBar = (TextView) inflater.inflate(R.id.title, container);
+            titleBar.setText(getArguments().getString("title"));
             // Keys used in Hashmap
             String[] from = {"name", "url"};
             // Ids of views in listview_layout
