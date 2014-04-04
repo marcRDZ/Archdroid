@@ -3,5 +3,6 @@
 
     <string name="app_name">Archdroid</string>
     <string name="action_settings">Settings</string>
+    <string name="action_navigation">Navigation</string>
     <string name="share_location">Would you like to share your location with Archdroid?</string>
 </resources>

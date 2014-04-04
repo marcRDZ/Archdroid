@@ -1,1 +1,1 @@
-include ':Archdroid', ':libraries:actionbarsherlock'
+include ':Archdroid'

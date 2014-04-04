@@ -6,8 +6,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.app.ListFragment;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,7 +16,6 @@ import android.view.ViewGroup;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
-import com.actionbarsherlock.app.SherlockListFragment;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -228,7 +227,7 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
 
     }
 
-    public static class AnnotationsFragment extends SherlockListFragment {
+    public static class AnnotationsFragment extends ListFragment {
 
         private String uri;
 

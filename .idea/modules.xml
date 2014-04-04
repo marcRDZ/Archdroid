@@ -4,7 +4,6 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Archdroid.iml" filepath="$PROJECT_DIR$/Archdroid.iml" />
       <module fileurl="file://$PROJECT_DIR$/Archdroid/Archdroid-Archdroid.iml" filepath="$PROJECT_DIR$/Archdroid/Archdroid-Archdroid.iml" />
-      <module fileurl="file://$PROJECT_DIR$/libraries/actionbarsherlock/actionbarsherlock.iml" filepath="$PROJECT_DIR$/libraries/actionbarsherlock/actionbarsherlock.iml" />
     </modules>
   </component>
 </project>

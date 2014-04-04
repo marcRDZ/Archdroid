@@ -1,18 +1,16 @@
 package com.theSoftwarer.archdroid;
 
 
-import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
-import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
+import android.support.v7.app.ActionBarActivity;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.widget.Toast;
 
-import com.actionbarsherlock.app.SherlockDialogFragment;
-import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -20,31 +18,26 @@ import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.maps.GoogleMap;
 
-import static android.content.SharedPreferences.Editor;
-
-public class MainActivity extends SherlockFragmentActivity  implements
+public class MainActivity extends ActionBarActivity implements
         GooglePlayServicesClient.ConnectionCallbacks, GooglePlayServicesClient.OnConnectionFailedListener{
 
     private static final int REQUEST_CODE_RECOVER_PLAY_SERVICES = 1001;
     private GoogleMap gMap;
     private ArchMapFragment archMapFragment;
-    private ShareLocationDialogFragment mFragment;
     private LocationClient mLocationClient;
     private static final LocationRequest mLocationRequest = LocationRequest.create()
             .setInterval(5000)
             .setFastestInterval(16)
             .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-    protected boolean isUpdatesRequested;
-    protected SharedPreferences mPrefs;
-    protected Editor mEditor;
+    private boolean isUpdatesRequested;
+    //protected SharedPreferences mPrefs;
+    //protected Editor mEditor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mPrefs = getSharedPreferences("SharedPreferences", Context.MODE_PRIVATE);
-        mEditor = mPrefs.edit();
-        getLocationUpdatesPreferences(mPrefs);
+        isUpdatesRequested = false;
 
     }
 
@@ -52,9 +45,8 @@ public class MainActivity extends SherlockFragmentActivity  implements
     protected void onStart() {
         super.onStart();
         setUpMapIfNeeded();
-        setUpLocationClientIfNeeded();
         if (isUpdatesRequested){
-            mLocationClient.connect();
+            setUpLocationClient();
         }
 
     }
@@ -63,11 +55,9 @@ public class MainActivity extends SherlockFragmentActivity  implements
     protected void onResume() {
         super.onResume();
 
-        getLocationUpdatesPreferences(mPrefs);
         setUpMapIfNeeded();
-        setUpLocationClientIfNeeded();
         if (isUpdatesRequested) {
-            mLocationClient.connect();
+            setUpLocationClient();
         }
 
     }
@@ -78,7 +68,6 @@ public class MainActivity extends SherlockFragmentActivity  implements
         if (mLocationClient != null) {
             mLocationClient.disconnect();
         }
-        setLocationUpdatesPreferences(mEditor);
     }
 
     @Override
@@ -106,13 +95,23 @@ public class MainActivity extends SherlockFragmentActivity  implements
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
             case REQUEST_CODE_RECOVER_PLAY_SERVICES:
-                if (resultCode == RESULT_CANCELED) {
+                if (resultCode != RESULT_CANCELED) {
+                    if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)){
+                        GooglePlayServicesUtil.getErrorDialog(resultCode, this, REQUEST_CODE_RECOVER_PLAY_SERVICES).show();
+                    }
+                }else {
                     Toast.makeText(this, "Google Play Services must be installed.", Toast.LENGTH_LONG).show();
                     finish();
                 }
-                return;
         }
-        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.main, menu);
+        return super.onCreateOptionsMenu(menu);
     }
 
     private void setUpMapIfNeeded() {
@@ -133,63 +132,46 @@ public class MainActivity extends SherlockFragmentActivity  implements
         gMap.setOnMarkerClickListener(archMapFragment);
     }
 
-    private void setUpLocationClientIfNeeded() {
+    private void setUpLocationClient() {
             if (mLocationClient == null) {
                 mLocationClient = new LocationClient(getApplicationContext(),this,this);
-            }
+            } else
+                mLocationClient.connect();
     }
 
     private boolean isPlayServicesInstalled() {
-        int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
-        if (status != ConnectionResult.SUCCESS) {
-            if (GooglePlayServicesUtil.isUserRecoverableError(status)) {
 
-                GooglePlayServicesUtil.getErrorDialog(status, this,REQUEST_CODE_RECOVER_PLAY_SERVICES).show();
-            } else {
-                Toast.makeText(this, "This device is not supported.", Toast.LENGTH_LONG).show();
-                finish();
+        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+        if (resultCode != ConnectionResult.SUCCESS) {
+
+            Dialog errorDialog = GooglePlayServicesUtil.getErrorDialog(resultCode, this,REQUEST_CODE_RECOVER_PLAY_SERVICES);
+            if (errorDialog != null) {
+                ErrorDialogFragment errorFragment = new ErrorDialogFragment();
+                errorFragment.setDialog(errorDialog);
+                errorFragment.show(getSupportFragmentManager(), "Location Updates");
             }
-            return false;
+
+        }return false;
+    }
+
+    public static class ErrorDialogFragment extends DialogFragment {
+
+        private Dialog mDialog;
+
+        public ErrorDialogFragment() {
+            super();
+            mDialog = null;
         }
-        return true;
-    }
 
-    private void getLocationUpdatesPreferences(SharedPreferences sharedPreferences) {
-        if (!sharedPreferences.contains("KEY_UPDATES_ON")) {
-            mFragment = new ShareLocationDialogFragment();
-            mFragment.show(getSupportFragmentManager(),"Location Updates");
-        } else {
-            isUpdatesRequested = sharedPreferences.getBoolean("KEY_UPDATES_ON", false);
+        public void setDialog(Dialog dialog) {
+            mDialog = dialog;
         }
 
-    }
-
-    private void setLocationUpdatesPreferences(Editor editor) {
-        editor.putBoolean("KEY_UPDATES_ON", isUpdatesRequested);
-        editor.commit();
-    }
-
-
-    public class ShareLocationDialogFragment extends SherlockDialogFragment {
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
-
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-            builder.setMessage(R.string.share_location)
-                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            isUpdatesRequested = true;
-                            //mFragment.dismiss();
-                        }
-                    })
-                    .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            isUpdatesRequested = false;
-                            //mFragment.dismiss();
-                        }
-                    });
-            return builder.create();
+            return mDialog;
         }
+
     }
 
 }

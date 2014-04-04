@@ -1,7 +1,7 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="ArchdroidTheme" parent="Theme.Sherlock">
+    <style name="ArchdroidTheme" parent="Theme.AppCompat.Light">
         <!-- Customize your theme here. -->
     </style>
 
