@@ -1,6 +1,7 @@
 package com.theSoftwarer.archdroid;
 
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -87,22 +88,21 @@ public class MainActivity extends ActionBarActivity implements
                 e.printStackTrace();
             }
         } else {
-            GooglePlayServicesUtil.getErrorDialog(connectionResult.getErrorCode(), this,REQUEST_CODE_RECOVER_PLAY_SERVICES).show();
+            GooglePlayServicesUtil.showErrorDialogFragment(connectionResult.getErrorCode(), this,REQUEST_CODE_RECOVER_PLAY_SERVICES);
         }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode) {
-            case REQUEST_CODE_RECOVER_PLAY_SERVICES:
-                if (resultCode != RESULT_CANCELED) {
-                    if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)){
-                        GooglePlayServicesUtil.getErrorDialog(resultCode, this, REQUEST_CODE_RECOVER_PLAY_SERVICES).show();
-                    }
-                }else {
-                    Toast.makeText(this, "Google Play Services must be installed.", Toast.LENGTH_LONG).show();
-                    finish();
-                }
+        if(requestCode == REQUEST_CODE_RECOVER_PLAY_SERVICES)
+        switch (resultCode) {
+            case ConnectionResult.CANCELED:
+                Toast.makeText(this, "Google Play Services must be installed.", Toast.LENGTH_LONG).show();
+                finish();
+            break;
+            case ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED:
+                GooglePlayServicesUtil.showErrorDialogFragment(resultCode, this, REQUEST_CODE_RECOVER_PLAY_SERVICES);
+            break;
         }
     }
 
@@ -150,8 +150,8 @@ public class MainActivity extends ActionBarActivity implements
                 errorFragment.setDialog(errorDialog);
                 errorFragment.show(getSupportFragmentManager(), "Location Updates");
             }
-
-        }return false;
+            return false;
+        }return true;
     }
 
     public static class ErrorDialogFragment extends DialogFragment {
