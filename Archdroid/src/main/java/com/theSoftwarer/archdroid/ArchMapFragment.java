@@ -26,14 +26,16 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,8 +52,8 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
     private static final int CREATE_MARKERS = 1415;
     private static final int CREATE_PAGES = 9265;
     private static final int CREATE_LISTS = 3589;
-    private String bounds, js, urlPlace;
-    private static String idMarker;
+    private String bounds, js;
+    private static String urlPlace;
     private static Handler handler;
     private DatasetsAdapter mPagerAdapter;
     private ViewPager mPager;
@@ -139,14 +141,17 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
         return false;
     }
 
-    private static void searchPelagiosData(String string, int switcher) throws IOException {
-        HttpURLConnection conn = null;
+    private static void searchPelagiosData(String url, int switcher) throws IOException {
+        //HttpURLConnection conn = null;
         final StringBuilder json = new StringBuilder();
         try {
 // Connect to the web service
-            URL url = new URL(string);
-            conn = (HttpURLConnection) url.openConnection();
-            InputStreamReader in = new InputStreamReader(conn.getInputStream());
+            //URL url = new URL(string);
+            //conn = (HttpURLConnection) url.openConnection();
+            //InputStreamReader in = new InputStreamReader(conn.getInputStream());
+            HttpClient httpclient = new DefaultHttpClient();
+            HttpResponse response = httpclient.execute(new HttpGet(url));
+            InputStreamReader in = new InputStreamReader(response.getEntity().getContent());
 
 // Read the JSON data into the StringBuilder
             int read;
@@ -154,13 +159,14 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
             while ((read = in.read(buff)) != -1) {
                 json.append(buff, 0, read);
             }
+            in.close();
         } catch (IOException e) {
             Log.e(LOG_TAG, "Error connecting to service", e);
             throw new IOException("Error connecting to service", e);
         } finally {
-            if (conn != null) {
+/*            if (conn != null) {
                 conn.disconnect();
-            }
+            }*/
             sendToUIThread(json.toString(), switcher);
         }
     }
@@ -174,7 +180,7 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
         handler.sendMessage(msg);
     }
 
-    void createMarkersFromJson(String json) throws JSONException {
+   private void createMarkersFromJson(String json) throws JSONException {
 
         JSONArray jsonArray = new JSONArray(json);
         for (int i = 0; i < jsonArray.length(); i++) {
@@ -187,12 +193,11 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
             //.icon(BitmapDescriptorFactory.fromResource(R.drawable.unknown))
             );
             urlPlace = jsonObj.getString("uri");
-            idMarker = jsonObj.getString("source");
 
         }
     }
 
-    void createPagesFromJson (String json) throws JSONException {
+    private void createPagesFromJson (String json) throws JSONException {
 
         List<String[]> datasets = new ArrayList<String[]>();
         String[] titleUri = new String[2];
@@ -242,7 +247,7 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
             new Thread(new Runnable() {
                 public void run() {
                     try {
-                        searchPelagiosData( uri + "/annotations.json?forPlace=" + idMarker, CREATE_LISTS);
+                        searchPelagiosData( uri + "/annotations.json?forPlace=" + urlPlace, CREATE_LISTS);
 
                     } catch (IOException e) {
                         Log.e(LOG_TAG, "Cannot retrieve annotations for this place", e);

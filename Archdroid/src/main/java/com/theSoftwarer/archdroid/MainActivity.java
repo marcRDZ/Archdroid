@@ -1,7 +1,6 @@
 package com.theSoftwarer.archdroid;
 
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -102,6 +101,10 @@ public class MainActivity extends ActionBarActivity implements
             break;
             case ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED:
                 GooglePlayServicesUtil.showErrorDialogFragment(resultCode, this, REQUEST_CODE_RECOVER_PLAY_SERVICES);
+            break;
+            case ConnectionResult.SUCCESS:
+                Toast.makeText(this, "Success!.", Toast.LENGTH_LONG).show();
+                finish();
             break;
         }
     }
