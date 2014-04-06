@@ -146,14 +146,17 @@ public class MainActivity extends ActionBarActivity implements
 
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
         if (resultCode != ConnectionResult.SUCCESS) {
-
-            Dialog errorDialog = GooglePlayServicesUtil.getErrorDialog(resultCode, this,REQUEST_CODE_RECOVER_PLAY_SERVICES);
-            if (errorDialog != null) {
-                ErrorDialogFragment errorFragment = new ErrorDialogFragment();
-                errorFragment.setDialog(errorDialog);
-                errorFragment.show(getSupportFragmentManager(), "Location Updates");
-            }
-            return false;
+            if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)){
+                Dialog errorDialog = GooglePlayServicesUtil.getErrorDialog(resultCode, this, REQUEST_CODE_RECOVER_PLAY_SERVICES);
+                if (errorDialog != null) {
+                    ErrorDialogFragment errorFragment = new ErrorDialogFragment();
+                    errorFragment.setDialog(errorDialog);
+                    errorFragment.show(getSupportFragmentManager(), "Location Updates");
+                }
+            }else {
+                Toast.makeText(this, "This device is not supported.", Toast.LENGTH_LONG).show();
+                finish();
+            }return false;
         }return true;
     }
 

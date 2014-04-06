@@ -141,7 +141,7 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
         return false;
     }
 
-    private static void searchPelagiosData(String url, int switcher) throws IOException {
+    private static void searchPelagiosData(String url, int switcher) throws IOException, IllegalArgumentException {
         //HttpURLConnection conn = null;
         final StringBuilder json = new StringBuilder();
         try {
@@ -162,8 +162,11 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
             in.close();
         } catch (IOException e) {
             Log.e(LOG_TAG, "Error connecting to service", e);
-            throw new IOException("Error connecting to service", e);
-        } finally {
+            throw new IOException("IOError connecting to service", e);
+        } catch (IllegalArgumentException e) {
+            Log.e(LOG_TAG, "Error connecting to service", e);
+            throw new IOException("HttpError connecting to service", e);
+        }finally {
 /*            if (conn != null) {
                 conn.disconnect();
             }*/
