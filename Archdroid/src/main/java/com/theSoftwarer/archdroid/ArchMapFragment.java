@@ -48,7 +48,7 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
         GoogleMap.OnMarkerClickListener, LocationListener {
 
     private static final String LOG_TAG = "Archdroid";
-    private static final String PELAGIOS_BBOX_QUERY = "http://pelagios.dme.ait.ac.at/api/places.json?bbox=";
+    private static final String PELAGIOS_QUERY = "http://pelagios.dme.ait.ac.at/api/places";
     private static final int CREATE_MARKERS = 1415;
     private static final int CREATE_PAGES = 9265;
     private static final int CREATE_LISTS = 3589;
@@ -104,28 +104,28 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
     @Override
     public void onCameraChange(CameraPosition cameraPosition) {
 
-            LatLngBounds bBox = this.getMap().getProjection().getVisibleRegion().latLngBounds;
-            DecimalFormat df = new DecimalFormat("#.##");
-            bounds = df.format(bBox.southwest.longitude) +","+ df.format(bBox.southwest.latitude)
-                    +","+ df.format(bBox.northeast.longitude) +","+ df.format(bBox.northeast.latitude);
+        LatLngBounds bBox = this.getMap().getProjection().getVisibleRegion().latLngBounds;
+        DecimalFormat df = new DecimalFormat("#.##");
+        bounds = df.format(bBox.southwest.longitude) +","+ df.format(bBox.southwest.latitude)
+        +","+ df.format(bBox.northeast.longitude) +","+ df.format(bBox.northeast.latitude);
 
-            new Thread(new Runnable() {
-                public void run() {
-                    try {
-                       searchPelagiosData(PELAGIOS_BBOX_QUERY + bounds, CREATE_MARKERS);
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                   searchPelagiosData(PELAGIOS_QUERY + ".json?bbox=" + bounds, CREATE_MARKERS);
 
-                    } catch (IOException e) {
-                        Log.e(LOG_TAG, "Cannot retrieve places", e);
-                    }
+                } catch (IOException e) {
+                    Log.e(LOG_TAG, "Cannot retrieve places", e);
+                } catch (IllegalArgumentException e) {
+                    Log.e(LOG_TAG, "Error connecting to service", e);
                 }
-            }).start();
+            }
+        }).start();
 
     }
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-
-        //urlPlace = marker.getSnippet();
 
         new Thread(new Runnable() {
             public void run() {
@@ -134,6 +134,8 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
 
                 } catch (IOException e) {
                     Log.e(LOG_TAG, "Cannot retrieve datasets for this places", e);
+                } catch (IllegalArgumentException e) {
+                    Log.e(LOG_TAG, "Error connecting to service", e);
                 }
             }
         }).start();
@@ -142,18 +144,14 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
     }
 
     private static void searchPelagiosData(String url, int switcher) throws IOException, IllegalArgumentException {
-        //HttpURLConnection conn = null;
+
         final StringBuilder json = new StringBuilder();
         try {
-// Connect to the web service
-            //URL url = new URL(string);
-            //conn = (HttpURLConnection) url.openConnection();
-            //InputStreamReader in = new InputStreamReader(conn.getInputStream());
+
             HttpClient httpclient = new DefaultHttpClient();
             HttpResponse response = httpclient.execute(new HttpGet(url));
             InputStreamReader in = new InputStreamReader(response.getEntity().getContent());
 
-// Read the JSON data into the StringBuilder
             int read;
             char[] buff = new char[1024];
             while ((read = in.read(buff)) != -1) {
@@ -165,11 +163,8 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
             throw new IOException("IOError connecting to service", e);
         } catch (IllegalArgumentException e) {
             Log.e(LOG_TAG, "Error connecting to service", e);
-            throw new IOException("HttpError connecting to service", e);
+            throw new IllegalArgumentException("HttpError connecting to service", e);
         }finally {
-/*            if (conn != null) {
-                conn.disconnect();
-            }*/
             sendToUIThread(json.toString(), switcher);
         }
     }
@@ -190,9 +185,9 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
 
             JSONObject jsonObj = jsonArray.getJSONObject(i);
             getMap().addMarker(new MarkerOptions().position(new LatLng(
-                    jsonObj.getJSONObject("geometry").getJSONArray("coordinates").optDouble(1),
-                    jsonObj.getJSONObject("geometry").getJSONArray("coordinates").optDouble(0)
-            )).snippet(jsonObj.getString("uri"))
+                            jsonObj.getJSONObject("geometry").getJSONArray("coordinates").optDouble(1),
+                            jsonObj.getJSONObject("geometry").getJSONArray("coordinates").optDouble(0)
+                    ))
             //.icon(BitmapDescriptorFactory.fromResource(R.drawable.unknown))
             );
             urlPlace = jsonObj.getString("uri");
@@ -202,14 +197,15 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
 
     private void createPagesFromJson (String json) throws JSONException {
 
-        List<String[]> datasets = new ArrayList<String[]>();
-        String[] titleUri = new String[2];
+        List<HashMap<String,String>> datasets = new ArrayList<HashMap<String,String>>();
+        HashMap<String, String> hm = new HashMap<String,String>();
+
         JSONArray jsonArray = new JSONArray(json);
         for (int i = 0; i < jsonArray.length(); i++) {
             JSONObject jsonObj = jsonArray.getJSONObject(i);
-            titleUri[0] = jsonObj.getString("uri");
-            titleUri[1] = jsonObj.getString("title");
-            datasets.add(titleUri);
+            hm.put("uri", jsonObj.getString("uri"));
+            hm.put("title", jsonObj.getString("title"));
+            datasets.add(hm);
         }
         mPagerAdapter = new DatasetsAdapter(getActivity().getSupportFragmentManager(), datasets);
         mPager = (ViewPager)getActivity().findViewById(R.id.viewpager_layout);
@@ -219,9 +215,10 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
 
     private void createListFromJson(String json) throws JSONException {
 
-        JSONArray jsonArray = new JSONArray(json);
+        JSONObject jsonObject = new JSONObject(json);
         annotations = new ArrayList<HashMap<String,String>>();
         HashMap<String, String> hm = new HashMap<String,String>();
+        JSONArray jsonArray = jsonObject.getJSONArray("annotations");
 
         for (int i = 0; i < jsonArray.length(); i++) {
 
@@ -240,7 +237,7 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
         private String uri;
 
         public AnnotationsFragment() {
-
+                annotations = null;
         }
 
         @Override
@@ -254,6 +251,8 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
 
                     } catch (IOException e) {
                         Log.e(LOG_TAG, "Cannot retrieve annotations for this place", e);
+                    } catch (IllegalArgumentException e) {
+                        Log.e(LOG_TAG, "Error connecting to service", e);
                     }
                 }
             }).start();
@@ -272,9 +271,10 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
             int[] to = { R.id.name, R.id.url};
             // Instantiating an adapter to store each items
             // R.layout.list_layout defines the layout of each item
-            SimpleAdapter adapter = new SimpleAdapter(getActivity().getBaseContext(), annotations, R.layout.list_layout, from, to);
-            setListAdapter(adapter);
-
+            if (annotations != null) {
+                SimpleAdapter adapter = new SimpleAdapter(getActivity().getBaseContext(), annotations, R.layout.list_layout, from, to);
+                setListAdapter(adapter);
+            }
             return super.onCreateView(inflater, container, savedInstanceState);
         }
 
@@ -296,19 +296,19 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
 
     public static class DatasetsAdapter extends FragmentStatePagerAdapter {
 
-        List<String[]> dsets;
-        String[] ttlUr;
+        List<HashMap<String,String>> dsets;
+        HashMap<String, String> stringStringHashMap;
         AnnotationsFragment anFrag;
 
-        public DatasetsAdapter(FragmentManager fm, List<String[]> datasets) {
+        public DatasetsAdapter(FragmentManager fm, List<HashMap<String,String>> datasets) {
             super(fm);
             this.dsets = datasets;
         }
 
         @Override
         public Fragment getItem(int position) {
-            ttlUr = dsets.get(position);
-            anFrag = anFrag.newInstance(position, dsets.size(), ttlUr[0], ttlUr[1]);
+            stringStringHashMap = dsets.get(position);
+            anFrag = anFrag.newInstance(position, dsets.size(), stringStringHashMap.get("title"), stringStringHashMap.get("uri"));
             return anFrag;
         }
 
