@@ -104,7 +104,7 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
     @Override
     public void onCameraChange(CameraPosition cameraPosition) {
 
-            LatLngBounds bBox = getMap().getProjection().getVisibleRegion().latLngBounds;
+            LatLngBounds bBox = this.getMap().getProjection().getVisibleRegion().latLngBounds;
             DecimalFormat df = new DecimalFormat("#.##");
             bounds = df.format(bBox.southwest.longitude) +","+ df.format(bBox.southwest.latitude)
                     +","+ df.format(bBox.northeast.longitude) +","+ df.format(bBox.northeast.latitude);

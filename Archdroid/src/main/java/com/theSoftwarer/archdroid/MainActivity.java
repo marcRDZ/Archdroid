@@ -99,13 +99,6 @@ public class MainActivity extends ActionBarActivity implements
                 Toast.makeText(this, "Google Play Services must be installed.", Toast.LENGTH_LONG).show();
                 finish();
             break;
-            case ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED:
-                GooglePlayServicesUtil.showErrorDialogFragment(resultCode, this, REQUEST_CODE_RECOVER_PLAY_SERVICES);
-            break;
-            case ConnectionResult.SUCCESS:
-                Toast.makeText(this, "Success!.", Toast.LENGTH_LONG).show();
-                finish();
-            break;
         }
     }
 
@@ -119,7 +112,6 @@ public class MainActivity extends ActionBarActivity implements
 
     private void setUpMapIfNeeded() {
         if (isPlayServicesInstalled()){
-
             if (gMap == null) {
                 archMapFragment = (ArchMapFragment) getSupportFragmentManager().findFragmentById(R.id.map_layout);
                 gMap = archMapFragment.getMap();
