@@ -14,7 +14,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SimpleAdapter;
-import android.widget.TextView;
 
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -127,6 +126,7 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
     @Override
     public boolean onMarkerClick(Marker marker) {
 
+        urlPlace = marker.getSnippet();
         new Thread(new Runnable() {
             public void run() {
                 try {
@@ -180,19 +180,21 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
 
    private void createMarkersFromJson(String json) throws JSONException {
 
-        JSONArray jsonArray = new JSONArray(json);
-        for (int i = 0; i < jsonArray.length(); i++) {
+        try {
+            JSONArray jsonArray = new JSONArray(json);
+            for (int i = 0; i < jsonArray.length(); i++) {
 
-            JSONObject jsonObj = jsonArray.getJSONObject(i);
-            getMap().addMarker(new MarkerOptions().position(new LatLng(
-                            jsonObj.getJSONObject("geometry").getJSONArray("coordinates").optDouble(1),
-                            jsonObj.getJSONObject("geometry").getJSONArray("coordinates").optDouble(0)
-                    ))
-            //.icon(BitmapDescriptorFactory.fromResource(R.drawable.unknown))
-            );
-            urlPlace = jsonObj.getString("uri");
+                JSONObject jsonObj = jsonArray.getJSONObject(i);
+                getMap().addMarker(new MarkerOptions().position(new LatLng(
+                                jsonObj.getJSONObject("geometry").getJSONArray("coordinates").optDouble(1),
+                                jsonObj.getJSONObject("geometry").getJSONArray("coordinates").optDouble(0)
+                        )).snippet(jsonObj.getString("uri"))
+                        //.icon(BitmapDescriptorFactory.fromResource(R.drawable.unknown))
+                );
 
-        }
+            }
+        }catch (JSONException e){e.printStackTrace();}
+
     }
 
     private void createPagesFromJson (String json) throws JSONException {
@@ -200,50 +202,83 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
         List<HashMap<String,String>> datasets = new ArrayList<HashMap<String,String>>();
         HashMap<String, String> hm = new HashMap<String,String>();
 
-        JSONArray jsonArray = new JSONArray(json);
-        for (int i = 0; i < jsonArray.length(); i++) {
-            JSONObject jsonObj = jsonArray.getJSONObject(i);
-            hm.put("uri", jsonObj.getString("uri"));
-            hm.put("title", jsonObj.getString("title"));
-            datasets.add(hm);
-        }
+        try {
+            JSONArray jsonArray = new JSONArray(json);
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject jsonObj = jsonArray.getJSONObject(i);
+                hm.put("uri", jsonObj.getString("uri"));
+                hm.put("title", jsonObj.getString("title"));
+                datasets.add(hm);
+            }
+        }catch (JSONException e){e.printStackTrace();}
+
         mPagerAdapter = new DatasetsAdapter(getActivity().getSupportFragmentManager(), datasets);
         mPager = (ViewPager)getActivity().findViewById(R.id.viewpager_layout);
         mPager.setAdapter(mPagerAdapter);
+
         mPager.setVisibility(View.VISIBLE);
     }
 
     private void createListFromJson(String json) throws JSONException {
 
-        JSONObject jsonObject = new JSONObject(json);
         annotations = new ArrayList<HashMap<String,String>>();
         HashMap<String, String> hm = new HashMap<String,String>();
-        JSONArray jsonArray = jsonObject.getJSONArray("annotations");
 
-        for (int i = 0; i < jsonArray.length(); i++) {
+        try {
+            JSONObject jsonObject = new JSONObject(json);
+            JSONArray jsonArray = jsonObject.getJSONArray("annotations");
 
-            JSONObject jsonObj = jsonArray.getJSONObject(i);
-            jsonObj = jsonObj.getJSONObject("annotations");
-            hm.put("name", jsonObj.getString("target_title"));
-            hm.put("url", jsonObj.getString("hasTarget"));
-            annotations.add(hm);
+            for (int i = 0; i < jsonArray.length(); i++) {
 
-        }
+                JSONObject jsonObj = jsonArray.getJSONObject(i);
+                jsonObj = jsonObj.getJSONObject("annotations");
+                hm.put("name", jsonObj.getString("target_title"));
+                hm.put("url", jsonObj.getString("hasTarget"));
+                annotations.add(hm);
+
+            }
+        }catch (JSONException e){e.printStackTrace();}
 
     }
 
     public static class AnnotationsFragment extends ListFragment {
 
-        private String uri;
 
+        private String uri;
+        String[] countries = new String[] {
+                "India",
+                "Pakistan",
+                "Sri Lanka",
+                "China",
+                "Bangladesh",
+                "Nepal",
+                "Afghanistan",
+                "North Korea",
+                "South Korea",
+                "Japan"
+        };
+        String[] currency = new String[]{
+                "Indian Rupee",
+                "Pakistani Rupee",
+                "Sri Lankan Rupee",
+                "Renminbi",
+                "Bangladeshi Taka",
+                "Nepalese Rupee",
+                "Afghani",
+                "North Korean Won",
+                "South Korean Won",
+                "Japanese Yen"
+        };
         public AnnotationsFragment() {
-                annotations = null;
+            annotations = null;
         }
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
+
             uri = getArguments().getString("uri");
+/*
             new Thread(new Runnable() {
                 public void run() {
                     try {
@@ -255,36 +290,36 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
                         Log.e(LOG_TAG, "Error connecting to service", e);
                     }
                 }
-            }).start();
+            }).start();*/
 
         }
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
 
-
-            View v = inflater.inflate(R.layout.list_layout, container);
-            TextView titleBar = (TextView) v.findViewById(R.id.title);
-            titleBar.setText(getArguments().getString("title"));
+            List<HashMap<String,String>> aList = new ArrayList<HashMap<String,String>>();
+            for(int i=0;i<10;i++){
+                HashMap<String, String> hm = new HashMap<String,String>();
+                hm.put("name", "Country : " + countries[i]);
+                hm.put("url","Currency : " + currency[i]);
+                aList.add(hm);
+            }
             // Keys used in Hashmap
             String[] from = {"name", "url"};
             // Ids of views in listview_layout
             int[] to = { R.id.name, R.id.url};
             // Instantiating an adapter to store each items
             // R.layout.list_layout defines the layout of each item
-            if (annotations != null) {
-                SimpleAdapter adapter = new SimpleAdapter(getActivity().getBaseContext(), annotations, R.layout.list_layout, from, to);
+
+                SimpleAdapter adapter = new SimpleAdapter(getActivity().getBaseContext(), aList, R.layout.list_layout, from, to);
                 setListAdapter(adapter);
-            }
+
             return super.onCreateView(inflater, container, savedInstanceState);
         }
 
-        public static AnnotationsFragment newInstance(int ord, int count, String title, String uri) {
+        public static AnnotationsFragment newInstance(String uri) {
 
             AnnotationsFragment f = new AnnotationsFragment();
             Bundle args = new Bundle();
-            args.putInt("ord", ord);
-            args.putInt("count", count);
-            args.putString("title", title);
             args.putString("uri", uri);
             f.setArguments(args);
 
@@ -296,25 +331,31 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
 
     public static class DatasetsAdapter extends FragmentStatePagerAdapter {
 
-        List<HashMap<String,String>> dsets;
+        List<HashMap<String,String>> dSets;
         HashMap<String, String> stringStringHashMap;
-        AnnotationsFragment anFrag;
+        AnnotationsFragment annotationsFragment;
 
         public DatasetsAdapter(FragmentManager fm, List<HashMap<String,String>> datasets) {
             super(fm);
-            this.dsets = datasets;
+            this.dSets = datasets;
         }
 
         @Override
         public Fragment getItem(int position) {
-            stringStringHashMap = dsets.get(position);
-            anFrag = anFrag.newInstance(position, dsets.size(), stringStringHashMap.get("title"), stringStringHashMap.get("uri"));
-            return anFrag;
+            stringStringHashMap = dSets.get(position);
+            annotationsFragment = annotationsFragment.newInstance(stringStringHashMap.get("uri"));
+            return annotationsFragment;
         }
 
         @Override
         public int getCount() {
-            return dsets.size();
+            return dSets.size();
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            stringStringHashMap = dSets.get(position);
+            return stringStringHashMap.get("title") +" "+ position +" "+ dSets.size();
         }
     }
 

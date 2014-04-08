@@ -96,7 +96,7 @@ public class MainActivity extends ActionBarActivity implements
         if(requestCode == REQUEST_CODE_RECOVER_PLAY_SERVICES)
         switch (resultCode) {
             case ConnectionResult.CANCELED:
-                Toast.makeText(this, "Google Play Services must be installed.", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Google Play Services must be installed.", Toast.LENGTH_SHORT).show();
                 finish();
             break;
         }
@@ -146,7 +146,7 @@ public class MainActivity extends ActionBarActivity implements
                     errorFragment.show(getSupportFragmentManager(), "Location Updates");
                 }
             }else {
-                Toast.makeText(this, "This device is not supported.", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "This device is not supported.", Toast.LENGTH_SHORT).show();
                 finish();
             }return false;
         }return true;

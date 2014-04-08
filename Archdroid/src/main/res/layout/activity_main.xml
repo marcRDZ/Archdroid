@@ -7,24 +7,35 @@
     android:orientation="vertical">
 
 
-    <fragment xmlns:map="http://schemas.android.com/apk/res-auto"
-        class="com.theSoftwarer.archdroid.ArchMapFragment"
-        android:id="@+id/map_layout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        map:cameraBearing="300"
-        map:cameraTargetLat="39.027719"
-        map:cameraTargetLng="14.487303"
-        map:cameraTilt="30"
-        map:cameraZoom="4" />
+        <fragment xmlns:map="http://schemas.android.com/apk/res-auto"
+            class="com.theSoftwarer.archdroid.ArchMapFragment"
+            android:id="@+id/map_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            map:cameraBearing="300"
+            map:cameraTargetLat="39.027719"
+            map:cameraTargetLng="14.487303"
+            map:cameraTilt="30"
+            map:cameraZoom="4" />
 
 
         <android.support.v4.view.ViewPager
-        android:id="@+id/viewpager_layout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone"
-        android:layout_weight="1"/>
+            android:id="@+id/viewpager_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            android:layout_weight="1">
+
+            <android.support.v4.view.PagerTitleStrip
+                android:id="@+id/pager_title_strip"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top"
+                android:background="#33b5e5"
+                android:textColor="#fff"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp" />
+        </android.support.v4.view.ViewPager>
 
 </LinearLayout>
