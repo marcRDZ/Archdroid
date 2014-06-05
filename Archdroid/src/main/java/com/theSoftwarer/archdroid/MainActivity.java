@@ -9,6 +9,7 @@ import android.support.v4.app.DialogFragment;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -23,7 +24,7 @@ public class MainActivity extends ActionBarActivity implements
 
     private static final int REQUEST_CODE_RECOVER_PLAY_SERVICES = 1001;
     private GoogleMap gMap;
-    private ArchMapFragment archMapFragment;
+    public ArchMapFragment archMapFragment;
     private LocationClient mLocationClient;
     private static final LocationRequest mLocationRequest = LocationRequest.create()
             .setInterval(5000)
@@ -37,7 +38,6 @@ public class MainActivity extends ActionBarActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        isUpdatesRequested = false;
 
     }
 
@@ -45,21 +45,12 @@ public class MainActivity extends ActionBarActivity implements
     protected void onStart() {
         super.onStart();
         setUpMapIfNeeded();
-        if (isUpdatesRequested){
-            setUpLocationClient();
-        }
-
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
         setUpMapIfNeeded();
-        if (isUpdatesRequested) {
-            setUpLocationClient();
-        }
-
     }
 
     @Override
@@ -87,7 +78,12 @@ public class MainActivity extends ActionBarActivity implements
                 e.printStackTrace();
             }
         } else {
-            GooglePlayServicesUtil.showErrorDialogFragment(connectionResult.getErrorCode(), this,REQUEST_CODE_RECOVER_PLAY_SERVICES);
+            Dialog errorDialog = GooglePlayServicesUtil.getErrorDialog(connectionResult.getErrorCode(), this, REQUEST_CODE_RECOVER_PLAY_SERVICES);
+            if (errorDialog != null) {
+                ErrorDialogFragment errorFragment = new ErrorDialogFragment();
+                errorFragment.setDialog(errorDialog);
+                errorFragment.show(getSupportFragmentManager(), "Google Play Services connection?");
+            }
         }
     }
 
@@ -108,6 +104,17 @@ public class MainActivity extends ActionBarActivity implements
         MenuInflater menuInflater = getMenuInflater();
         menuInflater.inflate(R.menu.main, menu);
         return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.navigation:
+                setUpLocationClient();
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+
     }
 
     private void setUpMapIfNeeded() {
@@ -143,7 +150,7 @@ public class MainActivity extends ActionBarActivity implements
                 if (errorDialog != null) {
                     ErrorDialogFragment errorFragment = new ErrorDialogFragment();
                     errorFragment.setDialog(errorDialog);
-                    errorFragment.show(getSupportFragmentManager(), "Location Updates");
+                    errorFragment.show(getSupportFragmentManager(), "Google Play Services?");
                 }
             }else {
                 Toast.makeText(this, "This device is not supported.", Toast.LENGTH_SHORT).show();
