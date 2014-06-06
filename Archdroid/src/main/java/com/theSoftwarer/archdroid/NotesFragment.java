@@ -15,7 +15,9 @@ import android.widget.TextView;
 import org.json.JSONException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by Ras-Mars on 05/06/2014.
@@ -23,9 +25,12 @@ import java.util.HashMap;
 public class NotesFragment extends ListFragment {
 
 
+    private String title, idDataset, pleiadesPlace, index, count, jsn;
+    private Uri.Builder builder;
+    private static final int CREATE_LISTS = 3589;
     private static Handler handler;
-    private String title, idDataset, index, count, jsn;
-    private Uri.Builder annotationsBuilder;
+    private static List<HashMap<String,String>> annotations;
+
     public NotesFragment() {
 
         handler = new Handler() {
@@ -37,11 +42,16 @@ public class NotesFragment extends ListFragment {
 
                 if(b.getInt("switcher") == CREATE_LISTS){
 
+                    annotations = new ArrayList<HashMap<String, String>>();
+
                     try {
-                        createListFromJson(jsn);
+                        JsonManager.createListFromJson(jsn, annotations);
                     } catch (JSONException e) {
                         e.printStackTrace();
-                    }
+                    } /*finally {
+                        AnnotationsAdapter adapter = new AnnotationsAdapter();
+                        setListAdapter(adapter);
+                    }*/
                 }
             }
         };
@@ -56,20 +66,21 @@ public class NotesFragment extends ListFragment {
             count = Integer.toString(getArguments().getInt("count"));
             title = getArguments().getString("title");
             idDataset = getArguments().getString("idDataset");
+            pleiadesPlace = getArguments().getString("urlPleiades");
         }
-        annotationsBuilder = new Uri.Builder();
-        annotationsBuilder.scheme("http").authority("pelagios.dme.ait.ac.at")
-                .path("/api/datasets/" + idDataset + "/annotations.json").appendQueryParameter("forPlace", urlPleiades);
-        //Toast.makeText(getActivity().getApplicationContext(), annotationsBuilder.toString(), Toast.LENGTH_SHORT).show();
+        builder = new Uri.Builder();
+        builder.scheme("http").authority("pelagios.dme.ait.ac.at")
+                .path("/api/datasets/" + idDataset + "/annotations.json").appendQueryParameter("forPlace", pleiadesPlace);
+
         new Thread(new Runnable() {
             public void run() {
                 try {
-                    searchPelagiosData( annotationsBuilder.toString(), CREATE_LISTS);
+                    JsonManager.searchPelagiosData(builder.toString(), CREATE_LISTS, handler);
 
                 } catch (IOException e) {
-                    Log.e(LOG_TAG, "Cannot retrieve annotations for this place", e);
+                    Log.e(ArchMapFragment.LOG_TAG, "Cannot retrieve annotations for this place", e);
                 } catch (IllegalArgumentException e) {
-                    Log.e(LOG_TAG, "Error connecting to service", e);
+                    Log.e(ArchMapFragment.LOG_TAG, "Error connecting to service", e);
                 }
             }
         }).start();
@@ -99,12 +110,13 @@ public class NotesFragment extends ListFragment {
 
     }
 
-    public static NotesFragment newInstance(String title, String id, int index, int count) {
+    public static NotesFragment newInstance(String title, String id, String uri, int index, int count) {
 
         NotesFragment f = new NotesFragment();
         Bundle args = new Bundle();
         args.putString("title", title);
         args.putString("idDataset", id);
+        args.putString("urlPleiades", uri);
         args.putInt("index", index);
         args.putInt("count", count);
         f.setArguments(args);

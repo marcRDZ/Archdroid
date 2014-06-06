@@ -30,9 +30,6 @@ public class MainActivity extends ActionBarActivity implements
             .setInterval(5000)
             .setFastestInterval(16)
             .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-    private boolean isUpdatesRequested;
-    //protected SharedPreferences mPrefs;
-    //protected Editor mEditor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
