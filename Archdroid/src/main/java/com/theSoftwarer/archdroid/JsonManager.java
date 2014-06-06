@@ -89,7 +89,7 @@ public class JsonManager {
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject jsonObj = jsonArray.getJSONObject(i);
                 String idDataset = jsonObj.getString("uri").substring(43);
-                Fragment fragment = NotesFragment.newInstance(jsonObj.getString("title"), place, idDataset, i + 1, jsonArray.length());
+                Fragment fragment = NotesFragment.newInstance(jsonObj.getString("title"), idDataset, place, i + 1, jsonArray.length());
                 datasets.add(fragment);
             }
         }catch (JSONException e){e.printStackTrace();}
@@ -114,7 +114,7 @@ public class JsonManager {
                 notes.add(hm);
 
             }
-        }catch (JSONException e){e.printStackTrace();}
+        } catch (JSONException e){e.printStackTrace();}
 
     }
 }

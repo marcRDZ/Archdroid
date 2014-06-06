@@ -1,5 +1,6 @@
 package com.theSoftwarer.archdroid;
 
+import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -30,9 +31,11 @@ public class NotesFragment extends ListFragment {
     private static final int CREATE_LISTS = 3589;
     private static Handler handler;
     private static List<HashMap<String,String>> annotations;
+    private AnnotationsAdapter adapter;
 
     public NotesFragment() {
 
+        annotations = new ArrayList<HashMap<String, String>>();
         handler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
@@ -42,16 +45,15 @@ public class NotesFragment extends ListFragment {
 
                 if(b.getInt("switcher") == CREATE_LISTS){
 
-                    annotations = new ArrayList<HashMap<String, String>>();
 
                     try {
                         JsonManager.createListFromJson(jsn, annotations);
                     } catch (JSONException e) {
                         e.printStackTrace();
-                    } /*finally {
-                        AnnotationsAdapter adapter = new AnnotationsAdapter();
+                    } finally {
+
                         setListAdapter(adapter);
-                    }*/
+                    }
                 }
             }
         };
@@ -71,7 +73,13 @@ public class NotesFragment extends ListFragment {
         builder = new Uri.Builder();
         builder.scheme("http").authority("pelagios.dme.ait.ac.at")
                 .path("/api/datasets/" + idDataset + "/annotations.json").appendQueryParameter("forPlace", pleiadesPlace);
+    }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        adapter = new AnnotationsAdapter(getActivity().getApplicationContext(), R.layout.list_item, annotations);
         new Thread(new Runnable() {
             public void run() {
                 try {
@@ -84,8 +92,8 @@ public class NotesFragment extends ListFragment {
                 }
             }
         }).start();
-
     }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
 
@@ -96,17 +104,6 @@ public class NotesFragment extends ListFragment {
         tvTitle.setText(title);
         return v;
 
-
-    }
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        if (annotations != null){
-            AnnotationsAdapter adapter = new AnnotationsAdapter();
-            setListAdapter(adapter);
-        }
 
     }
 
@@ -126,8 +123,8 @@ public class NotesFragment extends ListFragment {
 
     private class AnnotationsAdapter extends ArrayAdapter<HashMap<String,String>> {
 
-        public AnnotationsAdapter() {
-            super(getActivity().getApplicationContext(), R.layout.list_item, annotations);
+        private AnnotationsAdapter(Context context, int resource, List<HashMap<String, String>> objects) {
+            super(context, resource, objects);
         }
 
         @Override
@@ -145,7 +142,7 @@ public class NotesFragment extends ListFragment {
                 holder = (AnnotationsHolder)row.getTag();
             }
 
-            holder.populateFrom(getItem(position));
+            holder.populateFrom(annotations.get(position));
 
             return(row);
         }
@@ -163,7 +160,8 @@ public class NotesFragment extends ListFragment {
         void populateFrom(HashMap<String,String> hashMap){
             if (hashMap.containsKey("place"))
                 item.setText(hashMap.get("place"));
-            item.setText(hashMap.get("object"));
+            else
+                item.setText(hashMap.get("object"));
             url.setText(hashMap.get("url"));
         }
 

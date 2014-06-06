@@ -25,7 +25,7 @@
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="0dip" >
+        android:layout_height="wrap_content" >
         <!-- Here is the list. Since we are using a ListActivity, we
              have to call it "@android:id/list" so ListActivity will
              find it -->
