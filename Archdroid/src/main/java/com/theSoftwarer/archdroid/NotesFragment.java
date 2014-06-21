@@ -1,5 +1,6 @@
 package com.theSoftwarer.archdroid;
 
+import android.app.Activity;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
@@ -29,9 +30,9 @@ public class NotesFragment extends ListFragment {
     private String title, idDataset, pleiadesPlace, index, count, jsn;
     private Uri.Builder builder;
     private static final int CREATE_LISTS = 3589;
-    private static Handler handler;
-    private static List<HashMap<String,String>> annotations;
-    private AnnotationsAdapter adapter;
+    private Handler handler;
+    private List<HashMap<String,String>> annotations;
+    private NotesAdapter adapter;
 
     public NotesFragment() {
 
@@ -45,23 +46,21 @@ public class NotesFragment extends ListFragment {
 
                 if(b.getInt("switcher") == CREATE_LISTS){
 
-
                     try {
                         JsonManager.createListFromJson(jsn, annotations);
                     } catch (JSONException e) {
                         e.printStackTrace();
-                    } finally {
-
-                        setListAdapter(adapter);
                     }
+                    adapter = new NotesAdapter(getActivity().getApplicationContext(), R.layout.list_item, annotations);
+                    setListAdapter(adapter);
                 }
             }
         };
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
 
         if (getArguments() != null) {
             index = Integer.toString(getArguments().getInt("index"));
@@ -70,16 +69,16 @@ public class NotesFragment extends ListFragment {
             idDataset = getArguments().getString("idDataset");
             pleiadesPlace = getArguments().getString("urlPleiades");
         }
-        builder = new Uri.Builder();
-        builder.scheme("http").authority("pelagios.dme.ait.ac.at")
-                .path("/api/datasets/" + idDataset + "/annotations.json").appendQueryParameter("forPlace", pleiadesPlace);
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-        adapter = new AnnotationsAdapter(getActivity().getApplicationContext(), R.layout.list_item, annotations);
+        builder = new Uri.Builder();
+        builder.scheme("http").authority("pelagios.dme.ait.ac.at")
+                .path("/api/datasets/" + idDataset + "/annotations.json").appendQueryParameter("forPlace", pleiadesPlace);
+
         new Thread(new Runnable() {
             public void run() {
                 try {
@@ -92,6 +91,7 @@ public class NotesFragment extends ListFragment {
                 }
             }
         }).start();
+
     }
 
     @Override
@@ -102,8 +102,8 @@ public class NotesFragment extends ListFragment {
         TextView tvPosition = (TextView)v.findViewById(R.id.index);
         tvPosition.setText(index +"/"+ count);
         tvTitle.setText(title);
-        return v;
 
+        return v;
 
     }
 
@@ -121,9 +121,9 @@ public class NotesFragment extends ListFragment {
         return f;
     }
 
-    private class AnnotationsAdapter extends ArrayAdapter<HashMap<String,String>> {
+    public class NotesAdapter extends ArrayAdapter<HashMap<String,String>> {
 
-        private AnnotationsAdapter(Context context, int resource, List<HashMap<String, String>> objects) {
+        private NotesAdapter(Context context, int resource, List<HashMap<String, String>> objects) {
             super(context, resource, objects);
         }
 

@@ -19,7 +19,14 @@
             map:cameraZoom="4" />
 
 
-        <android.support.v4.view.ViewPager
+    <ViewAnimator
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/viewAnimator"
+        android:layout_gravity="center_horizontal"
+        android:layout_weight="1" />
+
+    <android.support.v4.view.ViewPager
             android:id="@+id/viewpager_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

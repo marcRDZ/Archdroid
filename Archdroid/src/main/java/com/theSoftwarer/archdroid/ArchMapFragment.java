@@ -37,7 +37,7 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
     public static final String LOG_TAG = "Archdroid";
     private static final int CREATE_MARKERS = 1415;
     private static final int CREATE_PAGES = 9265;
-    private String bounds, js;
+    private String js;
     private static String urlPleiades;
     private static Handler handler;
     private DatasetsAdapter mPagerAdapter;
@@ -58,7 +58,7 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
                     case CREATE_MARKERS:
 
                         try {
-                            JsonManager.createMarkersFromJson(js, getMap());
+                            JsonManager.createMarkersFromJson(js, getMap(), getActivity());
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -68,14 +68,14 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
                         datasets = new ArrayList<Fragment>();
                         try {
                             JsonManager.createPagesFromJson(js, urlPleiades, datasets);
+
                         } catch (JSONException e) {
                             e.printStackTrace();
-                        } finally {
+                        }
                             mPagerAdapter = new DatasetsAdapter(getActivity().getSupportFragmentManager(), datasets);
                             mPager = (ViewPager)getActivity().findViewById(R.id.viewpager_layout);
                             mPager.setAdapter(mPagerAdapter);
                             mPager.setVisibility(View.VISIBLE);
-                        }
                     break;
                 }
             }
@@ -94,9 +94,8 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
     @Override
     public void onCameraChange(CameraPosition cameraPosition) {
 
-        getBbox();
         builder = new Uri.Builder();
-        builder.scheme("http").authority("pelagios.dme.ait.ac.at").path("/api/places.json").appendQueryParameter("bbox", bounds);
+        builder.scheme("http").authority("pelagios.dme.ait.ac.at").path("/api/places.json").appendQueryParameter("bbox", getBbox());
 
         new Thread(new Runnable() {
             public void run() {
@@ -134,10 +133,12 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
         return false;
     }
 
-    private void getBbox(){
+    private String getBbox(){
+
         LatLngBounds bBox = getMap().getProjection().getVisibleRegion().latLngBounds;
         DecimalFormat df = new DecimalFormat("#.##");
-        bounds = df.format(bBox.southwest.longitude) +","+ df.format(bBox.southwest.latitude)
+
+        return df.format(bBox.southwest.longitude) +","+ df.format(bBox.southwest.latitude)
                 +","+ df.format(bBox.northeast.longitude) +","+ df.format(bBox.northeast.latitude);
     }
 
@@ -151,8 +152,7 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
         }
 
         @Override
-        public Fragment getItem(int position) {
-            return dSets.get(position);
+        public Fragment getItem(int position) { return dSets.get(position);
         }
 
         @Override
