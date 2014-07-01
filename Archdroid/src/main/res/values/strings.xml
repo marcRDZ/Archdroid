@@ -6,4 +6,5 @@
     <string name="action_navigation">Navigation</string>
     <string name="action_search">Search</string>
     <string name="action_compose">Misc</string>
+    <string name="action_about">About</string>
 </resources>

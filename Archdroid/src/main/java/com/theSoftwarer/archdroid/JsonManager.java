@@ -38,7 +38,7 @@ import java.util.List;
  */
 public class JsonManager {
 
-    public static void searchPelagiosData(String url, int switcher, Handler handler) throws IOException, IllegalArgumentException {
+    public static void searchPelagiosData(String url, Handler handler) throws IOException, IllegalArgumentException {
 
         final StringBuilder json = new StringBuilder();
         try {
@@ -60,22 +60,21 @@ public class JsonManager {
             Log.e(ArchMapFragment.LOG_TAG, "Error connecting to service", e);
             throw new IllegalArgumentException("HttpError connecting to service", e);
         }finally {
-            sendToUIThread(json.toString(), switcher, handler);
+            sendToUIThread(json.toString(), handler);
         }
     }
 
-    private static void sendToUIThread(String string, int switcher, Handler handler) {
+    private static void sendToUIThread(String string, Handler handler) {
         Message msg = handler.obtainMessage();
         Bundle bundle = new Bundle();
         bundle.putString("data", string);
-        bundle.putInt("switcher", switcher);
         msg.setData(bundle);
         handler.sendMessage(msg);
     }
 
     public static void createMarkersFromJson(String json, GoogleMap googleMap, Activity activity) throws JSONException {
 
-        String placeType = null;
+        String placeType;
 
         try {
             JSONArray jsonArray = new JSONArray(json);
@@ -84,14 +83,16 @@ public class JsonManager {
 
                 JSONObject jsonObj = jsonArray.getJSONObject(i);
 
-                if (!jsonObj.optString("feature_type").equals(""))
+                if (!jsonObj.optString("feature_type").equals("")) {
                     placeType = jsonObj.optString("feature_type").substring(50);
+                }
+                else placeType = "unknown";
 
                 googleMap.addMarker(new MarkerOptions().position(new LatLng(
-                                                            jsonObj.getJSONObject("geometry").getJSONArray("coordinates").optDouble(1),
-                                                            jsonObj.getJSONObject("geometry").getJSONArray("coordinates").optDouble(0)))
-                                                        .snippet(jsonObj.getString("source"))
-                                                        .icon(BitmapDescriptorFactory.fromBitmap(setCustomMarker(activity, placeType)))
+                                                    jsonObj.getJSONObject("geometry").getJSONArray("coordinates").optDouble(1),
+                                                    jsonObj.getJSONObject("geometry").getJSONArray("coordinates").optDouble(0)))
+                                                .snippet(jsonObj.optString("label") + "," + jsonObj.getString("source") + "," + placeType)
+                                                .icon(BitmapDescriptorFactory.fromBitmap(setCustomMarker(activity, placeType)))
                 );
 
             }
@@ -156,10 +157,8 @@ public class JsonManager {
 
     private static int setCustomIcon(String string) {
 
-        if (string != null){
-            if(iconsMap.containsKey(string))
-                return iconsMap.get(string);
-        }
+        if(iconsMap.containsKey(string))
+            return iconsMap.get(string);
 
         return R.drawable.unknown;
     }

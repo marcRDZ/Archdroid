@@ -10,27 +10,17 @@
             class="com.theSoftwarer.archdroid.ArchMapFragment"
             android:id="@+id/map_layout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
             map:cameraBearing="300"
             map:cameraTargetLat="39.027719"
             map:cameraTargetLng="14.487303"
             map:cameraTilt="30"
             map:cameraZoom="4" />
-
-
-    <ViewAnimator
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/viewAnimator"
-        android:layout_gravity="center_horizontal"
-        android:layout_weight="1" />
-
-    <android.support.v4.view.ViewPager
-            android:id="@+id/viewpager_layout"
+        <FrameLayout
+            android:id="@+id/container"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone"
-            android:layout_weight="1"/>
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
 
 </LinearLayout>

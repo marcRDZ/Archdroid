@@ -7,16 +7,22 @@
         android:icon="@android:drawable/ic_menu_search"
         android:title="@string/action_search"
         android:orderInCategory="100"
-        archdroid:showAsAction="ifRoom"/>
+        archdroid:showAsAction="always|collapseActionView"
+        archdroid:actionViewClass="android.support.v7.widget.SearchView" />
     <item android:id="@+id/navigation"
         android:icon="@android:drawable/ic_menu_directions"
         android:title="@string/action_navigation"
-        android:orderInCategory="100"
-        archdroid:showAsAction="ifRoom"/>
+        android:orderInCategory="101"
+        archdroid:showAsAction="always"/>
     <item android:id="@+id/action_compose"
         android:icon="@android:drawable/ic_menu_manage"
         android:title="@string/action_compose"
-        android:orderInCategory="100"
-        archdroid:showAsAction="ifRoom"/>
+        android:orderInCategory="102"
+        archdroid:showAsAction="ifRoom|withText"/>
+    <item android:id="@+id/about"
+        android:icon="@android:drawable/ic_menu_info_details"
+        android:title="@string/action_about"
+        android:orderInCategory="103"
+        archdroid:showAsAction="ifRoom|withText"/>
 
 </menu>
