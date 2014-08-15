@@ -11,7 +11,7 @@
             android:id="@+id/map_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="10"
             map:cameraBearing="300"
             map:cameraTargetLat="39.027719"
             map:cameraTargetLng="14.487303"
@@ -21,6 +21,6 @@
             android:id="@+id/container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1" />
+            android:layout_weight="40"/>
 
 </LinearLayout>

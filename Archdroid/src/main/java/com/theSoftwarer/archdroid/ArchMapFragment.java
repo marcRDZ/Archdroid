@@ -2,14 +2,17 @@ package com.theSoftwarer.archdroid;
 
 
 import android.location.Location;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.MotionEventCompat;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
-
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -24,19 +27,21 @@ import org.json.JSONException;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
 
 
 /**
  * Created by Ras-Mars on 14/02/14.
  */
 public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnCameraChangeListener,
-        GoogleMap.OnMarkerClickListener, LocationListener {
+        GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener, View.OnTouchListener, LocationListener {
 
     public static final String LOG_TAG = "Archdroid";
-    private static final int CREATE_MARKERS = 1415;
-    private String js;
+    private static final String PELAGIOS_API =  "http://pelagios.dme.ait.ac.at/api/places";
+    private String js, query;
     private Handler handler;
-    private Uri.Builder builder;
+    private PagesFragment pagesFragment;
 
     public ArchMapFragment() {
 
@@ -59,23 +64,14 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
     }
 
     @Override
-    public void onLocationChanged(Location location) {
-
-        LatLng mLatLng = new LatLng(location.getLatitude(),location.getLongitude());
-        getMap().animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(mLatLng, 15, 30, 0)));
-    }
-
-
-    @Override
     public void onCameraChange(CameraPosition cameraPosition) {
 
-        builder = new Uri.Builder();
-        builder.scheme("http").authority("pelagios.dme.ait.ac.at").path("/api/places.json").appendQueryParameter("bbox", getBbox());
+        query = PELAGIOS_API + ".json?bbox=" + getBbox();
 
         new Thread(new Runnable() {
             public void run() {
                 try {
-                    JsonManager.searchPelagiosData(builder.toString(), handler);
+                    JsonManager.searchPelagiosData(query, handler);
                 } catch (IOException e) {
                     Log.e(LOG_TAG, "Cannot retrieve places", e);
                 } catch (IllegalArgumentException e) {
@@ -87,12 +83,19 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
     }
 
     @Override
+    public void onLocationChanged(Location location) {
+
+        LatLng mLatLng = new LatLng(location.getLatitude(),location.getLongitude());
+        getMap().animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(mLatLng, 15, 30, 0)));
+    }
+
+    @Override
     public boolean onMarkerClick(Marker marker) {
 
-        String[] itemNameTypeSource = marker.getSnippet().split(",");
-        PagesFragment pagesFragment = PagesFragment.newInstance(itemNameTypeSource[0], itemNameTypeSource[1], itemNameTypeSource[2]);
+        String[] itemNameTypeSource = marker.getSnippet().split(":::");
+        pagesFragment = PagesFragment.newInstance(itemNameTypeSource[0], itemNameTypeSource[1], itemNameTypeSource[2]);
         FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
-        ft.setCustomAnimations(R.anim.lift_up, R.anim.lift_down);
+        ft.setCustomAnimations(R.anim.lift_up, R.anim.lift_down, R.anim.lift_up, R.anim.lift_down);
         ft.replace(R.id.container, pagesFragment);
         ft.addToBackStack(null);
         ft.commit();
@@ -103,10 +106,34 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
     private String getBbox(){
 
         LatLngBounds bBox = getMap().getProjection().getVisibleRegion().latLngBounds;
-        DecimalFormat df = new DecimalFormat("#.##");
+        DecimalFormatSymbols formatSymbols = new DecimalFormatSymbols(Locale.US);
+        DecimalFormat df = new DecimalFormat("#.##", formatSymbols);
 
         return df.format(bBox.southwest.longitude) +","+ df.format(bBox.southwest.latitude)
                 +","+ df.format(bBox.northeast.longitude) +","+ df.format(bBox.northeast.latitude);
     }
 
+    @Override
+    public void onMapClick(LatLng latLng) {
+
+    }
+
+    @Override
+    public boolean onTouch(View view, MotionEvent motionEvent) {
+
+        if ((MotionEvent.ACTION_DOWN == MotionEventCompat.getActionMasked(motionEvent)) && pagesFragment != null) {
+
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, 40);
+            pagesFragment.frameLayout.setLayoutParams(layoutParams);
+            ((ActionBarActivity) getActivity()).getSupportActionBar().show();
+            pagesFragment.isExpanded = false;
+
+            FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
+            ft.setCustomAnimations(R.anim.lift_up, R.anim.lift_down, R.anim.lift_up, R.anim.lift_down);
+            ft.remove(pagesFragment).commit();
+
+
+        }
+        return true;
+    }
 }

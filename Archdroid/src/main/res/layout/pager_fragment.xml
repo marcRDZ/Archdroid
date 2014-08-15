@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/pager_container"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#ffffff">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -18,17 +20,19 @@
             android:id="@+id/item_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="18sp"
-            android:text="ItemName"
+            android:textSize="20sp"
+            android:textStyle="italic"
+            android:textColor="#1c3664"
             android:layout_toRightOf="@+id/btn_expand"
-            android:padding="4dp" />
+            android:padding="4dp"/>
 
         <TextView
             android:id="@+id/item_type"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="12sp"
-            android:text="ItemType"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="#1c3664"
             android:layout_toLeftOf="@+id/btn_Flickr"
             android:layout_below="@+id/item_name"
             android:padding="4dp" />

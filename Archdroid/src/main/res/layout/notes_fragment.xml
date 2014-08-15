@@ -2,25 +2,31 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_height="25sp"
+        android:orientation="horizontal"
+        android:background="@drawable/list_pressed_archdroidtheme">
         <TextView
             android:id="@+id/name_database"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="18sp" />
+            android:textSize="13sp"
+            android:textColor="#FFFFFF"
+            android:padding="3dp"/>
 
         <TextView
             android:id="@+id/index"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="12sp" />
+            android:textSize="12sp"
+            android:textColor="#FFFFFF"
+            android:padding="3dp"
+            android:layout_alignParentRight="true"/>
 
-    </LinearLayout>
+    </RelativeLayout>
 
 
     <ListView android:id="@android:id/list"

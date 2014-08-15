@@ -1,7 +1,6 @@
 package com.theSoftwarer.archdroid;
 
 import android.app.Activity;
-import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -11,7 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import org.json.JSONException;
@@ -29,7 +28,6 @@ public class NotesFragment extends ListFragment {
 
     private String idDataset, pleiadesPlace, jsn;
     private Uri.Builder builder;
-    private static final int CREATE_LISTS = 3589;
     private Handler handler;
     private List<HashMap<String,String>> annotations;
     private NotesAdapter adapter;
@@ -49,7 +47,8 @@ public class NotesFragment extends ListFragment {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                adapter = new NotesAdapter(getActivity().getApplicationContext(), R.layout.list_item, annotations);
+
+                adapter = new NotesAdapter(annotations);
                 setListAdapter(adapter);
 
             }
@@ -72,22 +71,31 @@ public class NotesFragment extends ListFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        builder = new Uri.Builder();
-        builder.scheme("http").authority("pelagios.dme.ait.ac.at")
-                .path("/api/datasets/" + idDataset + "/annotations.json").appendQueryParameter("forPlace", pleiadesPlace);
+        if (savedInstanceState == null){
 
-        new Thread(new Runnable() {
-            public void run() {
-                try {
-                    JsonManager.searchPelagiosData(builder.toString(), handler);
+            builder = new Uri.Builder();
+            builder.scheme("http").authority("pelagios.dme.ait.ac.at")
+                    .path("/api/datasets/" + idDataset + "/annotations.json").appendQueryParameter("forPlace", pleiadesPlace);
 
-                } catch (IOException e) {
-                    Log.e(ArchMapFragment.LOG_TAG, "Cannot retrieve annotations for this place", e);
-                } catch (IllegalArgumentException e) {
-                    Log.e(ArchMapFragment.LOG_TAG, "Error connecting to service", e);
+            new Thread(new Runnable() {
+                public void run() {
+                    try {
+                        JsonManager.searchPelagiosData(builder.toString(), handler);
+
+                    } catch (IOException e) {
+                        Log.e(ArchMapFragment.LOG_TAG, "Cannot retrieve annotations for this place", e);
+                    } catch (IllegalArgumentException e) {
+                        Log.e(ArchMapFragment.LOG_TAG, "Error connecting to service", e);
+                    }
                 }
-            }
-        }).start();
+            }).start();
+        }
+
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
 
     }
 
@@ -118,34 +126,53 @@ public class NotesFragment extends ListFragment {
         return f;
     }
 
-    public class NotesAdapter extends ArrayAdapter<HashMap<String,String>> {
+    public class NotesAdapter extends BaseAdapter {
 
-        private NotesAdapter(Context context, int resource, List<HashMap<String, String>> objects) {
-            super(context, resource, objects);
+        private List<HashMap<String, String>> notes;
+
+        public NotesAdapter(List<HashMap<String, String>> notes) {
+            this.notes = notes;
         }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            View row=convertView;
+
             AnnotationsHolder holder;
 
-            if (row == null) {
-                LayoutInflater inflater = LayoutInflater.from(getContext());
-                row = inflater.inflate(R.layout.list_item, parent, false);
-                holder = new AnnotationsHolder(row);
-                row.setTag(holder);
+            if (convertView == null) {
+
+                convertView = LayoutInflater.from(getActivity()).inflate(R.layout.list_item, parent, false);
+                holder = new AnnotationsHolder(convertView);
+                convertView.setTag(holder);
             }
             else {
-                holder = (AnnotationsHolder)row.getTag();
+                holder = (AnnotationsHolder)convertView.getTag();
             }
 
-            holder.populateFrom(annotations.get(position));
+            holder.populateFrom(getItem(position));
 
-            return(row);
+            return convertView;
+        }
+
+        @Override
+        public HashMap<String, String> getItem(int position) {
+            return notes.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public int getCount() {
+
+            return notes.size();
         }
 
     }
-    private static class AnnotationsHolder {
+
+    public static class AnnotationsHolder {
 
         private TextView item, url;
 
@@ -155,12 +182,12 @@ public class NotesFragment extends ListFragment {
         }
 
         void populateFrom(HashMap<String,String> hashMap){
-            if (hashMap.containsKey("place"))
-                item.setText(hashMap.get("place"));
-            else
-                item.setText(hashMap.get("object"));
+
+            item.setText(hashMap.get("name"));
             url.setText(hashMap.get("url"));
+            //Linkify.addLinks(url, Linkify.WEB_URLS);
         }
 
     }
+
 }

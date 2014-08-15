@@ -19,7 +19,7 @@
 
 <resources>
 
-    <style name="Theme.Archdroidtheme" parent="@style/Theme.AppCompat.Light">
+    <style name="Theme.Archdroidtheme" parent="@style/Theme.AppCompat.Light.DarkActionBar">
         <item name="actionBarItemBackground">@drawable/selectable_background_archdroidtheme</item>
         <item name="popupMenuStyle">@style/PopupMenu.Archdroidtheme</item>
         <item name="dropDownListViewStyle">@style/DropDownListView.Archdroidtheme</item>
@@ -38,6 +38,7 @@
         <item name="backgroundStacked">@drawable/ab_stacked_solid_archdroidtheme</item>
         <item name="backgroundSplit">@drawable/ab_bottom_solid_archdroidtheme</item>
         <item name="progressBarStyle">@style/ProgressBar.Archdroidtheme</item>
+        <item name="titleTextStyle">@style/TitleTextStyle.ArchdroidTheme</item>
     </style>
 
     <style name="ActionBar.Transparent.Archdroidtheme" parent="@style/Widget.AppCompat.Light.ActionBar">
@@ -51,6 +52,10 @@
 
     <style name="DropDownListView.Archdroidtheme" parent="@style/Widget.AppCompat.Light.ListView.DropDown">
         <item name="android:listSelector">@drawable/selectable_background_archdroidtheme</item>
+    </style>
+
+    <style name="TitleTextStyle.ArchdroidTheme" parent="TextAppearance.AppCompat.Widget.ActionBar.Title">
+        <item name="android:textColor">@android:color/white</item>
     </style>
 
     <style name="ActionBarTabStyle.Archdroidtheme" parent="@style/Widget.AppCompat.Light.ActionBar.TabView">

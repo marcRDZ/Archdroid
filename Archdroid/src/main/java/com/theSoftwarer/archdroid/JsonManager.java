@@ -77,23 +77,27 @@ public class JsonManager {
         String placeType;
 
         try {
+
             JSONArray jsonArray = new JSONArray(json);
 
             for (int i = 0; i < jsonArray.length(); i++) {
 
                 JSONObject jsonObj = jsonArray.getJSONObject(i);
 
-                if (!jsonObj.optString("feature_type").equals("")) {
-                    placeType = jsonObj.optString("feature_type").substring(50);
+                if (jsonObj.has("feature_type")) {
+                    placeType = jsonObj.getString("feature_type").substring(50);
                 }
                 else placeType = "unknown";
 
-                googleMap.addMarker(new MarkerOptions().position(new LatLng(
-                                                    jsonObj.getJSONObject("geometry").getJSONArray("coordinates").optDouble(1),
-                                                    jsonObj.getJSONObject("geometry").getJSONArray("coordinates").optDouble(0)))
-                                                .snippet(jsonObj.optString("label") + "," + jsonObj.getString("source") + "," + placeType)
-                                                .icon(BitmapDescriptorFactory.fromBitmap(setCustomMarker(activity, placeType)))
-                );
+                if (jsonObj.getJSONObject("geometry").getString("type").equals("Point")) {
+
+                    googleMap.addMarker(new MarkerOptions().position(new LatLng(
+                                    jsonObj.getJSONObject("geometry").getJSONArray("coordinates").optDouble(1),
+                                    jsonObj.getJSONObject("geometry").getJSONArray("coordinates").optDouble(0)))
+                                    .snippet(jsonObj.optString("label") + ":::" + jsonObj.getString("source") + ":::" + placeType)
+                                    .icon(BitmapDescriptorFactory.fromBitmap(setCustomMarker(activity, placeType)))
+                    );
+                }
 
             }
         }catch (JSONException e){e.printStackTrace();}
@@ -113,10 +117,10 @@ public class JsonManager {
 
     }
 
-    public static void createListFromJson(String json, List notes) throws JSONException {
+    public static void createListFromJson(String json, List<HashMap<String,String>> notes) throws JSONException {
 
 
-        HashMap<String, String> hm = new HashMap<String,String>();
+
 
         try {
             JSONObject jsonObject = new JSONObject(json);
@@ -125,8 +129,13 @@ public class JsonManager {
             for (int i = 0; i < jsonArray.length(); i++) {
 
                 JSONObject jsonObj = jsonArray.getJSONObject(i);
-                hm.put("object", jsonObj.optString("target_title"));
-                hm.put("place", jsonObj.optString("title"));
+                HashMap<String, String> hm = new HashMap<String,String>();
+                if (jsonObj.has("target_title")) {
+                    hm.put("name", jsonObj.getString("target_title"));
+                }
+                if (jsonObj.has("title")) {
+                    hm.put("name", jsonObj.getString("title"));
+                }
                 hm.put("url", jsonObj.getString("hasTarget"));
                 notes.add(hm);
 

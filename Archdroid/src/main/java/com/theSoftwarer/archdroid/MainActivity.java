@@ -1,11 +1,9 @@
 package com.theSoftwarer.archdroid;
 
 
-import android.app.Dialog;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.os.Bundle;
-import android.support.v4.app.DialogFragment;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -73,19 +71,13 @@ public class MainActivity extends ActionBarActivity implements
             } catch (IntentSender.SendIntentException e) {
                 e.printStackTrace();
             }
-        } else {
-            Dialog errorDialog = GooglePlayServicesUtil.getErrorDialog(connectionResult.getErrorCode(), this, REQUEST_CODE_RECOVER_PLAY_SERVICES);
-            if (errorDialog != null) {
-                ErrorDialogFragment errorFragment = new ErrorDialogFragment();
-                errorFragment.setDialog(errorDialog);
-                errorFragment.show(getSupportFragmentManager(), "Google Play Services connection?");
-            }
         }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == REQUEST_CODE_RECOVER_PLAY_SERVICES)
+            Toast.makeText(this, String.valueOf(resultCode), Toast.LENGTH_SHORT).show();
         switch (resultCode) {
             case ConnectionResult.CANCELED:
                 Toast.makeText(this, "Google Play Services must be installed.", Toast.LENGTH_SHORT).show();
@@ -106,7 +98,20 @@ public class MainActivity extends ActionBarActivity implements
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.navigation:
-                setUpLocationClient();
+                setUpLocationClient(item);
+            case R.id.normal_mode:
+                if (!item.isChecked()) item.setChecked(true);
+                gMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+            case R.id.hybrid_mode:
+                if (!item.isChecked()) item.setChecked(true);
+                gMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+            case R.id.satellite_mode:
+                if (!item.isChecked()) item.setChecked(true);
+                gMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+            case R.id.terrain_mode:
+                if (!item.isChecked()) item.setChecked(true);
+                gMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -128,13 +133,21 @@ public class MainActivity extends ActionBarActivity implements
     private void setUpMap() {
         gMap.setOnCameraChangeListener(archMapFragment);
         gMap.setOnMarkerClickListener(archMapFragment);
+        gMap.setOnMapClickListener(archMapFragment);
     }
 
-    private void setUpLocationClient() {
-            if (mLocationClient == null) {
-                mLocationClient = new LocationClient(getApplicationContext(),this,this);
-            } else
+    private void setUpLocationClient(MenuItem item) {
+        if (mLocationClient == null) {
+            mLocationClient = new LocationClient(getApplicationContext(),this,this);
+        }
+            if (mLocationClient.isConnected()) {
+                mLocationClient.disconnect();
+                item.setIcon(R.drawable.selectable_location_off);
+            }
+            else {
                 mLocationClient.connect();
+                item.setIcon(R.drawable.selectable_location_on);
+            }
     }
 
     private boolean isPlayServicesInstalled() {
@@ -142,37 +155,12 @@ public class MainActivity extends ActionBarActivity implements
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
         if (resultCode != ConnectionResult.SUCCESS) {
             if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)){
-                Dialog errorDialog = GooglePlayServicesUtil.getErrorDialog(resultCode, this, REQUEST_CODE_RECOVER_PLAY_SERVICES);
-                if (errorDialog != null) {
-                    ErrorDialogFragment errorFragment = new ErrorDialogFragment();
-                    errorFragment.setDialog(errorDialog);
-                    errorFragment.show(getSupportFragmentManager(), "Google Play Services?");
-                }
+                GooglePlayServicesUtil.getErrorDialog(resultCode, this, REQUEST_CODE_RECOVER_PLAY_SERVICES).show();
             }else {
                 Toast.makeText(this, "This device is not supported.", Toast.LENGTH_SHORT).show();
                 finish();
             }return false;
         }return true;
-    }
-
-    public static class ErrorDialogFragment extends DialogFragment {
-
-        private Dialog mDialog;
-
-        public ErrorDialogFragment() {
-            super();
-            mDialog = null;
-        }
-
-        public void setDialog(Dialog dialog) {
-            mDialog = dialog;
-        }
-
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            return mDialog;
-        }
-
     }
 
 }

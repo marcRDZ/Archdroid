@@ -7,11 +7,16 @@ import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.json.JSONException;
@@ -23,16 +28,16 @@ import java.util.List;
 /**
  * Created by Ras-Mars on 29/06/2014.
  */
-public class PagesFragment extends Fragment {
+public class PagesFragment extends Fragment implements View.OnTouchListener{
 
-
-    private static final int CREATE_PAGES = 9265;
     private String js, urlPleiades;
     private Handler handler;
     private DatasetsAdapter mPagerAdapter;
     private List<Fragment> datasets;
     private ViewPager mPager;
     private Uri.Builder builder;
+    public boolean isExpanded;
+    public FrameLayout frameLayout;
 
     public PagesFragment() {
 
@@ -63,15 +68,15 @@ public class PagesFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-
+            isExpanded = false;
+            frameLayout = (FrameLayout) getActivity().findViewById(R.id.container);
     }
 
     @Override
     public void onStart() {
         super.onStart();
 
-        urlPleiades = getArguments().get("itemSource").toString();
+        urlPleiades = getArguments().getString("itemSource");
 
         builder = new Uri.Builder();
         builder.scheme("http").authority("pelagios.dme.ait.ac.at").path("/api/places/").appendPath(urlPleiades);
@@ -79,7 +84,7 @@ public class PagesFragment extends Fragment {
         new Thread(new Runnable() {
             public void run() {
                 try {
-                    JsonManager.searchPelagiosData(builder.toString() + "/datasets.json", handler);
+                    JsonManager.searchPelagiosData(builder + "/datasets.json", handler);
                 } catch (IOException e) {
                     Log.e(ArchMapFragment.LOG_TAG, "Cannot retrieve datasets for this places", e);
                 } catch (IllegalArgumentException e) {
@@ -93,12 +98,47 @@ public class PagesFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View v = inflater.inflate(R.layout.pager_fragment, container, false);
+
+        v.setOnTouchListener(this);
         TextView tvName = (TextView)v.findViewById(R.id.item_name);
         TextView tvType = (TextView)v.findViewById(R.id.item_type);
         tvName.setText(getArguments().getString("itemName"));
         tvType.setText(getArguments().getString("itemType"));
 
+/*        Button btnExpand = (Button)v.findViewById(R.id.btn_expand);
+        Button btnFlickr = (Button)v.findViewById(R.id.btn_Flickr);
+        btnExpand.setOnClickListener(this);
+        btnFlickr.setOnClickListener(this);*/
+
         return v;
+    }
+
+    @Override
+    public boolean onTouch(View view, MotionEvent motionEvent) {
+
+       int action = MotionEventCompat.getActionMasked(motionEvent);
+
+            switch (action) {
+                case MotionEvent.ACTION_DOWN:
+
+                    if (isExpanded) {
+                        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, 40);
+                        frameLayout.setLayoutParams(layoutParams);
+                        ((ActionBarActivity) getActivity()).getSupportActionBar().show();
+                        isExpanded = false;
+                    }
+                    else {
+                        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, 4);
+                        frameLayout.setLayoutParams(layoutParams);
+                        ((ActionBarActivity) getActivity()).getSupportActionBar().hide();
+                        isExpanded = true;
+                    }
+
+                break;
+
+            }
+
+        return true;
     }
 
     public static PagesFragment newInstance(String name, String source, String type) {
