@@ -105,11 +105,6 @@ public class PagesFragment extends Fragment implements View.OnTouchListener{
         tvName.setText(getArguments().getString("itemName"));
         tvType.setText(getArguments().getString("itemType"));
 
-/*        Button btnExpand = (Button)v.findViewById(R.id.btn_expand);
-        Button btnFlickr = (Button)v.findViewById(R.id.btn_Flickr);
-        btnExpand.setOnClickListener(this);
-        btnFlickr.setOnClickListener(this);*/
-
         return v;
     }
 

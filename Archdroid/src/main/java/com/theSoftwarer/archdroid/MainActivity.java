@@ -100,16 +100,20 @@ public class MainActivity extends ActionBarActivity implements
             case R.id.navigation:
                 setUpLocationClient(item);
             case R.id.normal_mode:
-                if (!item.isChecked()) item.setChecked(true);
+                if (!item.isChecked())
+                    item.setChecked(true);
                 gMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
             case R.id.hybrid_mode:
-                if (!item.isChecked()) item.setChecked(true);
+                if (!item.isChecked())
+                    item.setChecked(true);
                 gMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
             case R.id.satellite_mode:
-                if (!item.isChecked()) item.setChecked(true);
+                if (!item.isChecked())
+                    item.setChecked(true);
                 gMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
             case R.id.terrain_mode:
-                if (!item.isChecked()) item.setChecked(true);
+                if (!item.isChecked())
+                    item.setChecked(true);
                 gMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
 
             default:
@@ -142,6 +146,7 @@ public class MainActivity extends ActionBarActivity implements
         }
             if (mLocationClient.isConnected()) {
                 mLocationClient.disconnect();
+                archMapFragment.myLocation.remove();
                 item.setIcon(R.drawable.selectable_location_off);
             }
             else {

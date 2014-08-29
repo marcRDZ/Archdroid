@@ -6,11 +6,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.MotionEventCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
-import android.view.MotionEvent;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
@@ -18,10 +15,12 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONException;
 
@@ -35,13 +34,14 @@ import java.util.Locale;
  * Created by Ras-Mars on 14/02/14.
  */
 public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnCameraChangeListener,
-        GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener, View.OnTouchListener, LocationListener {
+        GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener, LocationListener {
 
     public static final String LOG_TAG = "Archdroid";
     private static final String PELAGIOS_API =  "http://pelagios.dme.ait.ac.at/api/places";
     private String js, query;
     private Handler handler;
     private PagesFragment pagesFragment;
+    public Marker myLocation;
 
     public ArchMapFragment() {
 
@@ -85,8 +85,10 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
     @Override
     public void onLocationChanged(Location location) {
 
+        if (myLocation != null) myLocation.remove();
         LatLng mLatLng = new LatLng(location.getLatitude(),location.getLongitude());
         getMap().animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(mLatLng, 15, 30, 0)));
+        myLocation = getMap().addMarker(new MarkerOptions().position(mLatLng).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_launcher)));
     }
 
     @Override
@@ -116,12 +118,7 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
     @Override
     public void onMapClick(LatLng latLng) {
 
-    }
-
-    @Override
-    public boolean onTouch(View view, MotionEvent motionEvent) {
-
-        if ((MotionEvent.ACTION_DOWN == MotionEventCompat.getActionMasked(motionEvent)) && pagesFragment != null) {
+        if (pagesFragment != null) {
 
             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, 40);
             pagesFragment.frameLayout.setLayoutParams(layoutParams);
@@ -131,9 +128,18 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
             FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
             ft.setCustomAnimations(R.anim.lift_up, R.anim.lift_down, R.anim.lift_up, R.anim.lift_down);
             ft.remove(pagesFragment).commit();
+        }
+    }
+
+/*    @Override
+    public boolean onTouch(View view, MotionEvent motionEvent) {
+        Toast.makeText(getActivity(),"touch!", Toast.LENGTH_SHORT).show();
+        if ((MotionEvent.ACTION_DOWN == MotionEventCompat.getActionMasked(motionEvent)) && pagesFragment != null) {
+
+
 
 
         }
         return true;
-    }
+    }*/
 }

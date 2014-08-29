@@ -8,7 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="25sp"
         android:orientation="horizontal"
-        android:background="@drawable/list_pressed_archdroidtheme">
+        android:background="#94bbe3">
         <TextView
             android:id="@+id/name_database"
             android:layout_width="wrap_content"
