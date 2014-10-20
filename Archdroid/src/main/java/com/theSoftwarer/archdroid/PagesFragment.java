@@ -7,15 +7,15 @@ import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.view.MotionEventCompat;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -28,7 +28,7 @@ import java.util.List;
 /**
  * Created by Ras-Mars on 29/06/2014.
  */
-public class PagesFragment extends Fragment implements View.OnTouchListener{
+public class PagesFragment extends Fragment {
 
     private String js, urlPleiades;
     private Handler handler;
@@ -36,8 +36,9 @@ public class PagesFragment extends Fragment implements View.OnTouchListener{
     private List<Fragment> datasets;
     private ViewPager mPager;
     private Uri.Builder builder;
-    public boolean isExpanded;
+    private ImageButton btnExpand;
     public FrameLayout frameLayout;
+    private static int weight;
 
     public PagesFragment() {
 
@@ -68,8 +69,8 @@ public class PagesFragment extends Fragment implements View.OnTouchListener{
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-            isExpanded = false;
-            frameLayout = (FrameLayout) getActivity().findViewById(R.id.container);
+        frameLayout = (FrameLayout) getActivity().findViewById(R.id.container);
+
     }
 
     @Override
@@ -99,41 +100,58 @@ public class PagesFragment extends Fragment implements View.OnTouchListener{
 
         View v = inflater.inflate(R.layout.pager_fragment, container, false);
 
-        v.setOnTouchListener(this);
         TextView tvName = (TextView)v.findViewById(R.id.item_name);
         TextView tvType = (TextView)v.findViewById(R.id.item_type);
+        ImageButton btnClose = (ImageButton)v.findViewById(R.id.btn_close);
+        btnExpand = (ImageButton)v.findViewById(R.id.btn_expand);
+        if (weight == 4){
+            btnExpand.setImageResource(R.drawable.ic_action_expand);
+        }else
+            btnExpand.setImageResource(R.drawable.ic_action_collapse);
+
         tvName.setText(getArguments().getString("itemName"));
         tvType.setText(getArguments().getString("itemType"));
+        btnExpand.setOnClickListener(new View.OnClickListener() {
+            
+            @Override
+            public void onClick(View view) {
+
+                if (weight == 4) {
+                    weight = 40;
+                    LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, weight);
+                    frameLayout.setLayoutParams(layoutParams);
+                    ((ActionBarActivity) getActivity()).getSupportActionBar().show();
+                    btnExpand.setImageResource(R.drawable.ic_action_collapse);
+                }
+                else {
+                    weight = 4;
+                    LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, weight);
+                    frameLayout.setLayoutParams(layoutParams);
+                    ((ActionBarActivity) getActivity()).getSupportActionBar().hide();
+                    btnExpand.setImageResource(R.drawable.ic_action_expand);
+                }
+            }
+        });
+        btnClose.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                    weight = 40;
+                    LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, weight);
+                    frameLayout.setLayoutParams(layoutParams);
+                    ((ActionBarActivity) getActivity()).getSupportActionBar().show();
+                    closeFragment();
+
+            }
+        });
 
         return v;
     }
 
-    @Override
-    public boolean onTouch(View view, MotionEvent motionEvent) {
-
-       int action = MotionEventCompat.getActionMasked(motionEvent);
-
-            switch (action) {
-                case MotionEvent.ACTION_DOWN:
-
-                    if (isExpanded) {
-                        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, 40);
-                        frameLayout.setLayoutParams(layoutParams);
-                        ((ActionBarActivity) getActivity()).getSupportActionBar().show();
-                        isExpanded = false;
-                    }
-                    else {
-                        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, 4);
-                        frameLayout.setLayoutParams(layoutParams);
-                        ((ActionBarActivity) getActivity()).getSupportActionBar().hide();
-                        isExpanded = true;
-                    }
-
-                break;
-
-            }
-
-        return true;
+    private void closeFragment(){
+        FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
+        ft.setCustomAnimations(R.anim.lift_up, R.anim.lift_down, R.anim.lift_up, R.anim.lift_down);
+        ft.remove(this).commit();
     }
 
     public static PagesFragment newInstance(String name, String source, String type) {

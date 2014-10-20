@@ -6,10 +6,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
-import android.view.ViewGroup;
-import android.widget.LinearLayout;
 
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -40,7 +37,7 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
     private static final String PELAGIOS_API =  "http://pelagios.dme.ait.ac.at/api/places";
     private String js, query;
     private Handler handler;
-    private PagesFragment pagesFragment;
+    public PagesFragment pagesFragment;
     public Marker myLocation;
 
     public ArchMapFragment() {
@@ -118,28 +115,6 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
     @Override
     public void onMapClick(LatLng latLng) {
 
-        if (pagesFragment != null) {
-
-            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, 40);
-            pagesFragment.frameLayout.setLayoutParams(layoutParams);
-            ((ActionBarActivity) getActivity()).getSupportActionBar().show();
-            pagesFragment.isExpanded = false;
-
-            FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
-            ft.setCustomAnimations(R.anim.lift_up, R.anim.lift_down, R.anim.lift_up, R.anim.lift_down);
-            ft.remove(pagesFragment).commit();
-        }
     }
 
-/*    @Override
-    public boolean onTouch(View view, MotionEvent motionEvent) {
-        Toast.makeText(getActivity(),"touch!", Toast.LENGTH_SHORT).show();
-        if ((MotionEvent.ACTION_DOWN == MotionEventCompat.getActionMasked(motionEvent)) && pagesFragment != null) {
-
-
-
-
-        }
-        return true;
-    }*/
 }

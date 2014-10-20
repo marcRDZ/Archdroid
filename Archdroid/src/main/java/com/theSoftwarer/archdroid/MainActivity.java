@@ -146,7 +146,7 @@ public class MainActivity extends ActionBarActivity implements
         }
             if (mLocationClient.isConnected()) {
                 mLocationClient.disconnect();
-                archMapFragment.myLocation.remove();
+                if (archMapFragment.myLocation != null) archMapFragment.myLocation.remove();
                 item.setIcon(R.drawable.selectable_location_off);
             }
             else {
