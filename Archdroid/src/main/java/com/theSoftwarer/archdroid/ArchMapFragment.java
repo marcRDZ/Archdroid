@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
 
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -31,13 +30,12 @@ import java.util.Locale;
  * Created by Ras-Mars on 14/02/14.
  */
 public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnCameraChangeListener,
-        GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener, LocationListener {
+        GoogleMap.OnMarkerClickListener, LocationListener {
 
-    public static final String LOG_TAG = "Archdroid";
     private static final String PELAGIOS_API =  "http://pelagios.dme.ait.ac.at/api/places";
     private String js, query;
     private Handler handler;
-    public PagesFragment pagesFragment;
+    private LatLngBounds bBox;
     public Marker myLocation;
 
     public ArchMapFragment() {
@@ -48,9 +46,8 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
 
                 Bundle b = msg.getData();
                 js = b.getString("data");
-
                 try {
-                    JsonManager.createMarkersFromJson(js, getMap(), getActivity());
+                    JsonManager.createMarkersFromJson(js, getMap(), bBox);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -70,9 +67,9 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
                 try {
                     JsonManager.searchPelagiosData(query, handler);
                 } catch (IOException e) {
-                    Log.e(LOG_TAG, "Cannot retrieve places", e);
+                    e.printStackTrace();
                 } catch (IllegalArgumentException e) {
-                    Log.e(LOG_TAG, "Error connecting to service", e);
+                    e.printStackTrace();
                 }
             }
         }).start();
@@ -86,13 +83,14 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
         LatLng mLatLng = new LatLng(location.getLatitude(),location.getLongitude());
         getMap().animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(mLatLng, 15, 30, 0)));
         myLocation = getMap().addMarker(new MarkerOptions().position(mLatLng).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_launcher)));
+
     }
 
     @Override
     public boolean onMarkerClick(Marker marker) {
 
         String[] itemNameTypeSource = marker.getSnippet().split(":::");
-        pagesFragment = PagesFragment.newInstance(itemNameTypeSource[0], itemNameTypeSource[1], itemNameTypeSource[2]);
+        PagesFragment pagesFragment = PagesFragment.newInstance(itemNameTypeSource[0], itemNameTypeSource[1], itemNameTypeSource[2]);
         FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
         ft.setCustomAnimations(R.anim.lift_up, R.anim.lift_down, R.anim.lift_up, R.anim.lift_down);
         ft.replace(R.id.container, pagesFragment);
@@ -104,17 +102,12 @@ public class ArchMapFragment extends SupportMapFragment implements GoogleMap.OnC
 
     private String getBbox(){
 
-        LatLngBounds bBox = getMap().getProjection().getVisibleRegion().latLngBounds;
+        bBox = getMap().getProjection().getVisibleRegion().latLngBounds;
         DecimalFormatSymbols formatSymbols = new DecimalFormatSymbols(Locale.US);
         DecimalFormat df = new DecimalFormat("#.##", formatSymbols);
 
         return df.format(bBox.southwest.longitude) +","+ df.format(bBox.southwest.latitude)
                 +","+ df.format(bBox.northeast.longitude) +","+ df.format(bBox.northeast.latitude);
-    }
-
-    @Override
-    public void onMapClick(LatLng latLng) {
-
     }
 
 }

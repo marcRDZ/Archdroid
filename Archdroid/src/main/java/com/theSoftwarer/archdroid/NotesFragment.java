@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.ListFragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -83,19 +82,13 @@ public class NotesFragment extends ListFragment {
                         JsonManager.searchPelagiosData(builder.toString(), handler);
 
                     } catch (IOException e) {
-                        Log.e(ArchMapFragment.LOG_TAG, "Cannot retrieve annotations for this place", e);
+                        e.printStackTrace();
                     } catch (IllegalArgumentException e) {
-                        Log.e(ArchMapFragment.LOG_TAG, "Error connecting to service", e);
+                        e.printStackTrace();
                     }
                 }
             }).start();
         }
-
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
 
     }
 
@@ -185,7 +178,6 @@ public class NotesFragment extends ListFragment {
 
             item.setText(hashMap.get("name"));
             url.setText(hashMap.get("url"));
-            //Linkify.addLinks(url, Linkify.WEB_URLS);
         }
 
     }

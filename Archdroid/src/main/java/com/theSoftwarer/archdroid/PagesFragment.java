@@ -10,7 +10,6 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -87,9 +86,9 @@ public class PagesFragment extends Fragment {
                 try {
                     JsonManager.searchPelagiosData(builder + "/datasets.json", handler);
                 } catch (IOException e) {
-                    Log.e(ArchMapFragment.LOG_TAG, "Cannot retrieve datasets for this places", e);
+                    e.printStackTrace();
                 } catch (IllegalArgumentException e) {
-                    Log.e(ArchMapFragment.LOG_TAG, "Error connecting to service", e);
+                    e.printStackTrace();
                 }
             }
         }).start();

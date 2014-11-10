@@ -100,21 +100,25 @@ public class MainActivity extends ActionBarActivity implements
             case R.id.navigation:
                 setUpLocationClient(item);
             case R.id.normal_mode:
-                if (!item.isChecked())
+                if (!item.isChecked()) {
+                    gMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
                     item.setChecked(true);
-                gMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                }
             case R.id.hybrid_mode:
-                if (!item.isChecked())
+                if (!item.isChecked()) {
+                    gMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
                     item.setChecked(true);
-                gMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+                }
             case R.id.satellite_mode:
-                if (!item.isChecked())
+                if (!item.isChecked()) {
+                    gMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
                     item.setChecked(true);
-                gMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+                }
             case R.id.terrain_mode:
-                if (!item.isChecked())
+                if (!item.isChecked()) {
+                    gMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
                     item.setChecked(true);
-                gMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+                }
 
             default:
                 return super.onOptionsItemSelected(item);
@@ -137,7 +141,6 @@ public class MainActivity extends ActionBarActivity implements
     private void setUpMap() {
         gMap.setOnCameraChangeListener(archMapFragment);
         gMap.setOnMarkerClickListener(archMapFragment);
-        gMap.setOnMapClickListener(archMapFragment);
     }
 
     private void setUpLocationClient(MenuItem item) {
